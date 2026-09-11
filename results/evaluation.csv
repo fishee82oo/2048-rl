@@ -1,0 +1,4 @@
+agent,games,seed,average_score,median_score,average_max_tile,best_score,best_max_tile,average_moves,reach_128_pct,reach_256_pct,reach_512_pct,reach_1024_pct,reach_2048_pct
+Random,100,10000,1101.64,1082.0,104.8,2864,256,119.37,54.0,8.0,0.0,0.0,0.0
+Greedy,100,10000,1953.84,1534.0,181.12,5064,512,177.31,91.0,38.0,4.0,0.0,0.0
+DQN,100,10000,1139.6,1114.0,105.76,2940,256,124.86,56.00000000000001,6.0,0.0,0.0,0.0
