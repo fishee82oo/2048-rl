@@ -7,13 +7,15 @@ import torch
 from torch import nn
 from models.dqn import DQN
 from utils.replay_buffer import ReplayBuffer
+from utils.strategy import filter_actions
 
 
 class DQNAgent:
     def __init__(self, gamma=0.99, learning_rate=1e-3, batch_size=128,
                  replay_buffer_size=100_000, epsilon_start=1.0,
                  epsilon_end=0.05, epsilon_decay_steps=100_000,
-                 target_update_frequency=1000):
+                 target_update_frequency=1000, strategy=False):
+        self.strategy = strategy
         self.online_network = DQN()
         self.target_network = DQN()
         self.optimizer = torch.optim.Adam(self.online_network.parameters(), lr=learning_rate)
@@ -32,7 +34,11 @@ class DQNAgent:
         return self.epsilon_start + fraction * (self.epsilon_end - self.epsilon_start)
 
     def select_action(self, state: np.ndarray, valid_actions: list[int],
-                      training: bool = True) -> int:
+                      training: bool = True, env=None) -> int:
+        if self.strategy:
+            if env is None:
+                raise ValueError("Strategy action selection requires env for safe simulation")
+            valid_actions = filter_actions(env, valid_actions)
         if not valid_actions:
             raise ValueError("Cannot select an action on a terminal board")
         epsilon = self.epsilon if training else 0.0
@@ -80,8 +86,17 @@ class DQNAgent:
     def save(self, path: Union[str, Path]) -> None:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
-        torch.save(self.online_network.state_dict(), path)
+        torch.save({"model_state_dict": self.online_network.state_dict(),
+                    "strategy": self.strategy}, path)
 
     def load(self, path: Union[str, Path]) -> None:
-        self.online_network.load_state_dict(torch.load(path, map_location="cpu", weights_only=True))
+        checkpoint = torch.load(path, map_location="cpu", weights_only=True)
+        if "model_state_dict" in checkpoint:
+            self.strategy = bool(checkpoint["strategy"])
+            weights = checkpoint["model_state_dict"]
+        else:
+            # Original weight-only checkpoints were trained without strategy.
+            self.strategy = False
+            weights = checkpoint
+        self.online_network.load_state_dict(weights)
         self.update_target_network()

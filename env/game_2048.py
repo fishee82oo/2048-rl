@@ -58,6 +58,11 @@ class Game2048:
             reward += gained
         return (result.T.copy() if action in (0, 1) else result), reward
 
+    def simulate_action(self, action: int) -> tuple[np.ndarray, int, bool]:
+        """Simulate without mutation, score updates, tile spawning, or RNG use."""
+        board, reward = self.simulate_move(action)
+        return board, reward, not np.array_equal(board, self.board)
+
     def get_valid_actions(self) -> list[int]:
         return [action for action in range(4)
                 if not np.array_equal(self.simulate_move(action)[0], self.board)]

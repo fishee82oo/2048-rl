@@ -10,8 +10,12 @@ def plot_training(history: pd.DataFrame, output_dir: Path, window: int = 100) ->
     for column, label, filename in (
         ("score", "Game score", "score_curve.png"),
         ("max_tile", "Maximum tile", "max_tile_curve.png"),
-        ("total_reward", "Episode reward", "reward_curve.png"),
+        ("total_reward", "Training reward", "reward_curve.png"),
+        ("corner_occupancy", "Corner occupancy (%)", "corner_occupancy_curve.png"),
+        ("snake_score", "Snake quality (0–1)", "snake_score_curve.png"),
     ):
+        if column not in history:
+            continue
         fig, ax = plt.subplots(figsize=(8, 4))
         ax.plot(history.episode, history[column], alpha=0.35, label="Per episode")
         ax.plot(history.episode, history[column].rolling(window, min_periods=1).mean(),

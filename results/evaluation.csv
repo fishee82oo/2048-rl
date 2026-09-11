@@ -1,4 +1,4 @@
-agent,games,seed,average_score,median_score,average_max_tile,best_score,best_max_tile,average_moves,reach_128_pct,reach_256_pct,reach_512_pct,reach_1024_pct,reach_2048_pct
-Random,100,10000,1101.64,1082.0,104.8,2864,256,119.37,54.0,8.0,0.0,0.0,0.0
-Greedy,100,10000,1953.84,1534.0,181.12,5064,512,177.31,91.0,38.0,4.0,0.0,0.0
-DQN,100,10000,1139.6,1114.0,105.76,2940,256,124.86,56.00000000000001,6.0,0.0,0.0,0.0
+agent,games,seed,average_score,median_score,average_max_tile,best_score,best_max_tile,average_moves,corner_occupancy,average_snake_quality,strategy_filter,checkpoint,reach_128_pct,reach_256_pct,reach_512_pct,reach_1024_pct,reach_2048_pct
+Random,100,42,1110.12,1038.0,111.36,3048,256,119.11,2.6145353115008216,0.682813476131384,False,,56.99999999999999,10.0,0.0,0.0,0.0
+Greedy,100,42,1879.12,1576.0,172.48,5076,512,172.52,2.866216939396214,0.668932505694118,False,,88.0,37.0,2.0,0.0,0.0
+DQN,100,42,3213.92,3088.0,276.64,12552,1024,254.01,94.00150022548068,0.7859645537042192,True,/Users/reineilw/Documents/Codex/2026-09-11/files-pasted-by-the-user-build/outputs/2048-rl/checkpoints/best_model.pt,88.0,65.0,25.0,2.0,0.0

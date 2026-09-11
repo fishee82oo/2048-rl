@@ -10,7 +10,7 @@ class RandomAgent:
 
 class GreedyAgent:
     def select_action(self, env: Game2048) -> int:
-        rewards = {action: env.simulate_move(action)[1]
+        rewards = {action: env.simulate_action(action)[1]
                    for action in env.get_valid_actions()}
         best = max(rewards.values())
         return random.choice([action for action, reward in rewards.items() if reward == best])

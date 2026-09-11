@@ -1,0 +1,5 @@
+agent,games,seed,average_score,median_score,average_max_tile,best_score,best_max_tile,average_moves,corner_occupancy,average_snake_quality,strategy_filter,checkpoint,reach_128_pct,reach_256_pct,reach_512_pct,reach_1024_pct,reach_2048_pct
+Random,100,10000,1101.64,1082.0,104.8,2864,256,119.37,3.1366676085634144,0.6878527552270473,False,,54.0,8.0,0.0,0.0,0.0
+Greedy,100,10000,1953.84,1534.0,181.12,5064,512,177.31,2.018466128435128,0.6653674663097527,False,,91.0,38.0,4.0,0.0,0.0
+DQN,100,10000,1139.6,1114.0,105.76,2940,256,124.86,3.5638827969331044,0.6690057538275964,False,runs/vanilla_smoke/checkpoints/best_model.pt,56.00000000000001,6.0,0.0,0.0,0.0
+DQN_compare,100,10000,1432.68,1294.0,115.68,5568,256,146.14,84.24515143784744,0.8152018766273053,True,runs/strategy_smoke/checkpoints/best_model.pt,60.0,13.0,0.0,0.0,0.0
