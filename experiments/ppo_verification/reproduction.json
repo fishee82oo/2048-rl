@@ -1,0 +1,6 @@
+{
+  "exact_parameters": true,
+  "exact_environment_states": true,
+  "steps": 8192,
+  "best_validation_score": 2390.4
+}

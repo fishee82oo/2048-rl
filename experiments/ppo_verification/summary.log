@@ -1,0 +1,11 @@
+                                                                  average_score_mean  average_score_std  reach_512_pct_mean  reach_1024_pct_mean  reach_2048_pct_mean
+method                corner_filter evaluation_condition_changed                                                                                                     
+dqn_strategy          False         True                                 1776.800000         169.826561            1.666667             0.000000                  0.0
+                      True          False                                1885.413333         395.910273            4.333333             0.000000                  0.0
+dqn_vanilla           False         False                                1466.080000         453.414122            1.333333             0.000000                  0.0
+ppo_potential_corner0 False         False                                2365.453333         420.043259            6.000000             0.000000                  0.0
+ppo_potential_corner1 False         True                                 2180.906667         360.117157            3.000000             0.000000                  0.0
+                      True          False                                2024.133333         523.492906            1.666667             0.000000                  0.0
+ppo_raw_corner0       False         False                                2628.986667         125.766834            6.000000             0.000000                  0.0
+ppo_raw_corner1       False         True                                 2185.666667         158.462464            2.666667             0.000000                  0.0
+                      True          False                                2289.173333         344.136960            5.000000             0.333333                  0.0

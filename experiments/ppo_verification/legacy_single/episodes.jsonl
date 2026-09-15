@@ -1,0 +1,1 @@
+{"steps": 202, "episode": 1, "env_id": 0, "raw_reward": 1112.0, "shaping_reward": 233.69893070550194, "training_reward": 1345.6989307055007, "length": 122, "score": 1112, "max_tile": 128, "terminated": true, "truncated": false}

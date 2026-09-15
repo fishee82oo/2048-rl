@@ -1,0 +1,38 @@
+{
+  "config": {
+    "learning_rate": 0.0003,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip_coef": 0.2,
+    "ent_coef": 0.01,
+    "vf_coef": 0.5,
+    "max_grad_norm": 0.5,
+    "num_envs": 1,
+    "rollout_steps": 256,
+    "minibatch_size": 256,
+    "update_epochs": 4,
+    "target_kl": 0.03,
+    "total_steps": 257,
+    "seed": 42,
+    "reward_mode": "legacy",
+    "corner_filter": true,
+    "reward_scale": 1.0,
+    "shaping_coef": 8.0,
+    "device": "cpu",
+    "validation_interval": 101,
+    "validation_seeds": [
+      100000,
+      100001,
+      100002
+    ],
+    "max_episode_steps": null
+  },
+  "device": "cpu",
+  "torch": "2.14.0",
+  "numpy": "2.5.3",
+  "python": "3.12.14",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "git_sha": "0f1bfda124da14016fed483bd03db0a9fdb2c9fe",
+  "git_dirty": true,
+  "resume": null
+}

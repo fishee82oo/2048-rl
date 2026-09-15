@@ -4,3 +4,5 @@ __pycache__/
 .DS_Store
 checkpoints/*.pt
 runs/**/checkpoints/*.pt
+
+experiments/**/checkpoints/*.pt

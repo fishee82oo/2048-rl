@@ -1,0 +1,4 @@
+steps=2048 fps=8604.5 val_best=-inf kl=0.00202
+steps=4096 fps=9316.5 val_best=2074.4 kl=0.00049
+steps=6144 fps=9227.1 val_best=2074.4 kl=0.00142
+steps=8192 fps=9449.5 val_best=2260.0 kl=0.00093

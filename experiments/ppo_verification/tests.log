@@ -1,0 +1,40 @@
+test_checkpoint_dispatch_and_exact_resume (test_ppo.PPOTests.test_checkpoint_dispatch_and_exact_resume) ... steps=8 fps=148.0 val_best=1912.0 kl=0.00001
+steps=16 fps=2069.9 val_best=2672.0 kl=0.00000
+steps=8 fps=2109.8 val_best=1912.0 kl=0.00001
+steps=16 fps=2622.9 val_best=2672.0 kl=0.00000
+ok
+test_clipping_both_signs (test_ppo.PPOTests.test_clipping_both_signs) ... ok
+test_collector_bootstraps_final_observation_before_reset (test_ppo.PPOTests.test_collector_bootstraps_final_observation_before_reset) ... ok
+test_hand_gae_terminal_and_rollout_cut (test_ppo.PPOTests.test_hand_gae_terminal_and_rollout_cut) ... ok
+test_kl_early_stopping (test_ppo.PPOTests.test_kl_early_stopping) ... ok
+test_mask_and_single_action (test_ppo.PPOTests.test_mask_and_single_action) ... ok
+test_multiple_environment_episode_boundaries (test_ppo.PPOTests.test_multiple_environment_episode_boundaries) ... ok
+test_one_env_partial_budget (test_ppo.PPOTests.test_one_env_partial_budget) ... ok
+test_ratio_and_update_saved_mask (test_ppo.PPOTests.test_ratio_and_update_saved_mask) ... ok
+test_reward_components_and_accounting (test_ppo.PPOTests.test_reward_components_and_accounting) ... ok
+test_truncation_bootstraps_but_breaks_trace (test_ppo.PPOTests.test_truncation_bootstraps_but_breaks_trace) ... ok
+test_validation_preserves_rng_and_collector (test_ppo.PPOTests.test_validation_preserves_rng_and_collector) ... ok
+test_all_directions (test_project.EnvironmentTests.test_all_directions) ... ok
+test_game_over (test_project.EnvironmentTests.test_game_over) ... ok
+test_greedy_does_not_mutate_or_consume_spawn_rng (test_project.EnvironmentTests.test_greedy_does_not_mutate_or_consume_spawn_rng) ... ok
+test_merges (test_project.EnvironmentTests.test_merges) ... ok
+test_spawning_and_state (test_project.EnvironmentTests.test_spawning_and_state) ... ok
+test_masking_and_round_trip (test_project.LearningTests.test_masking_and_round_trip) ... ok
+test_network_shape (test_project.LearningTests.test_network_shape) ... ok
+test_nonterminal_standard_dqn_target (test_project.LearningTests.test_nonterminal_standard_dqn_target) ... ok
+test_replay_copies_and_capacity (test_project.LearningTests.test_replay_copies_and_capacity) ... ok
+test_terminal_targets_and_target_sync (test_project.LearningTests.test_terminal_targets_and_target_sync) ... ok
+test_checkpoint_metadata_and_legacy (test_strategy.StrategyTests.test_checkpoint_metadata_and_legacy) ... ok
+test_corner_merge_with_tied_maxima (test_strategy.StrategyTests.test_corner_merge_with_tied_maxima) ... ok
+test_corner_transitions_and_unchanged_board (test_strategy.StrategyTests.test_corner_transitions_and_unchanged_board) ... ok
+test_empty_cell_bonus (test_strategy.StrategyTests.test_empty_cell_bonus) ... ok
+test_exploration_and_exploitation (test_strategy.StrategyTests.test_exploration_and_exploitation) ... ok
+test_fallback_unanchored_and_terminal (test_strategy.StrategyTests.test_fallback_unanchored_and_terminal) ... ok
+test_filter_and_simulation_do_not_mutate (test_strategy.StrategyTests.test_filter_and_simulation_do_not_mutate) ... ok
+test_ideal_beats_same_tiles_scrambled (test_strategy.StrategyTests.test_ideal_beats_same_tiles_scrambled) ... ok
+test_snake_order_with_corner_unchanged (test_strategy.StrategyTests.test_snake_order_with_corner_unchanged) ... ok
+
+----------------------------------------------------------------------
+Ran 31 tests in 0.918s
+
+OK

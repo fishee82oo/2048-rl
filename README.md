@@ -1,5 +1,7 @@
 # Deep Reinforcement Learning for 2048
 
+**PPO and reproducible comparisons:** see [the PPO section](#ppo-clip-and-reproducible-experiments), [branch audit](experiments/ppo_verification/AUDIT.md), and [measured results](experiments/ppo_verification/REPORT.md). The original DQN training entry point and historical artifacts below are preserved.
+
 A minimal, readable PyTorch project that trains a standard Deep Q-Network to play
 2048 and compares it with random and immediate-reward greedy baselines. The game
 and learning algorithm are implemented directly, without external RL libraries.
@@ -136,10 +138,10 @@ separate runs; relative custom paths are resolved from the working directory.
 ## Evaluation
 
 ```bash
-python evaluate.py --games 100 --seed 42
+python evaluate.py --games 100 --seed 200000 --output-dir experiments/legacy_eval
 ```
 
-This loads `checkpoints/best_model.pt`, runs 100 complete games per agent, and
+Pass `--checkpoint checkpoints/best_model.pt` to include that saved model. Without a checkpoint, the new evaluator runs Random and Greedy. It runs 100 complete games per agent and
 reports average and median score, average maximum tile, best score/tile, average
 moves, and the percentage reaching at least 128, 256, 512, 1024, and 2048.
 All agents use the same per-game environment seed sequence; different moves
@@ -147,7 +149,7 @@ still lead to different boards. Use a separate seed (e.g. `--seed 10000`) for
 held-out evaluation. To evaluate the final policy instead:
 
 ```bash
-python evaluate.py --checkpoint checkpoints/final_model.pt
+python evaluate.py --checkpoint checkpoints/final_model.pt --output-dir experiments/legacy_final_eval
 ```
 
 ## Watch the agent play
@@ -308,3 +310,166 @@ python -m unittest discover -s tests -v
 
 Each new training run adds `corner_occupancy_curve.png` and `snake_score_curve.png`
 to its results folder alongside score, maximum tile, and training reward plots.
+
+
+## PPO-Clip and reproducible experiments
+
+The new `train_ppo.py` directly implements PPO in PyTorch. `train.py` remains the
+historical episode-budget DQN trainer. `train_dqn_budget.py` is a separate harness
+for the **original** Vanilla/Strategy DQN behavior and Bellman update, using an
+explicit environment-step budget and validation-based checkpoint selection.
+There is no corrected-DQN variant in this change.
+
+### Model, masks, rewards, and targets
+
+- `models/actor_critic.py`: flatten16 log2 input, shared 128-ReLU-128-ReLU trunk,
+  four policy logits and one value. Action order: UP, DOWN, LEFT, RIGHT.
+- `agents/ppo_agent.py`: masked Categorical, clipped surrogate, half-MSE value
+  loss, entropy bonus, normalized advantages, clipped gradients, approximate KL,
+  clip fraction, explained variance, and optional KL stopping (`target_kl: null`
+  in JSON disables it). No replay buffer, epsilon, or target network.
+- `utils/rollout_buffer.py`: per-environment trajectories, including the actual
+  sampling mask, detached old log probabilities/values, actions, rewards and
+  terminated/truncated flags. Updates reuse **saved masks**. Terminal all-zero
+  masks are never sampled. Ragged final rollouts support `num_envs=1` and any
+  positive remaining budget, including less than `num_envs`.
+- `train_ppo.Collector`: synchronous environments with independent RNGs. GAE
+  stops at episode boundaries. Natural termination zeros bootstrap. Rollout
+  cuts bootstrap. Optional `--max-episode-steps` truncates and bootstraps from
+  the final observation **before reset**, while breaking the advantage trace.
+  It is disabled in both supplied configurations.
+- Game rules and raw scoring remain entirely in the unchanged `Game2048`.
+
+Reward controls are independent:
+
+```text
+--reward-mode raw:       shaping = 0
+--reward-mode potential: shaping = beta * (gamma * Phi(next) - Phi(state))
+--reward-mode legacy:    shaping = original strategy_reward(state, next)
+training_reward = (raw_game_reward + shaping) * reward_scale
+```
+
+`Phi = strategy_score`. Potential mode sets successor Phi to zero on natural
+termination only; it does not add the legacy +8/-16 bonuses. Legacy mode keeps
+all original constants and terminal behavior; `shaping_coef` applies only to
+potential mode. For the original branch reward **units**, select legacy with
+`--reward-scale 1 --corner-filter`; this reproduces reward/filter behavior, not
+DQN's learning algorithm. `--corner-filter` restricts otherwise legal actions;
+it defaults off independently of reward mode. Legal-action masking is always on.
+
+`configs/ppo_smoke.json` uses 4,096 steps and three validation games;
+`configs/ppo_formal.json` uses 1,000,000 steps and ten validation games. All
+hyperparameters are **untuned starting values**: lr=3e-4, gamma=.99, lambda=.95,
+clip=.2, entropy coefficient=.01, value coefficient=.5, max gradient norm=.5,
+8 environments, 256 steps per environment, minibatch=256, 4 epochs, KL limit=.03.
+Default reward scale is **0.01**, potential beta=8. These choices do not imply
+convergence. DQN baselines retain original unscaled rewards and lr=1e-3.
+
+### Run, resume, evaluate, and play
+
+Run from the repository root after installing `requirements.txt`; use the
+verification lockfile for the exact tested package versions. Every new training
+or evaluation directory must be unused, preventing accidental history overwrite.
+
+```bash
+python -m unittest discover -s tests -v
+python train_ppo.py --config configs/ppo_smoke.json --output-dir experiments/my_smoke
+python train_ppo.py --config configs/ppo_smoke.json \
+  --resume experiments/my_smoke/checkpoints/last.pt --total-steps 8192 \
+  --output-dir experiments/my_resume
+python evaluate.py --checkpoint experiments/my_resume/checkpoints/best.pt \
+  --algorithm ppo --games 100 --seed 200000 --output-dir experiments/my_test
+python play.py --checkpoint experiments/my_resume/checkpoints/best.pt \
+  --algorithm ppo --seed 300000 --delay 0
+```
+
+`--total-steps` is the cumulative target on resume, not additional steps. Resume
+allows budget/device overrides only; pass the original configuration and reward
+flags. Checkpoints store model, optimizer, algorithm, preprocessing, complete
+configuration, counters, environment boards/scores/RNGs, episode accumulators,
+and Python/NumPy/Torch/device RNG states. They support exact continuation at
+**saved update boundaries**, on the same software/device and with the same
+rollout partition. Ending an earlier run partway through a rollout adds an
+optimizer update: extending that run is valid but differs from an uninterrupted
+run with a larger rollout. No mid-update/crash-exact or cross-device bitwise
+resumption is promised. An inherited best checkpoint keeps its original
+selection provenance. Full PPO checkpoints use Python serialization; load files
+from trusted sources. Old weight-only and strategy-metadata DQN files still load;
+DQN checkpoints support evaluation/playback, not exact training resumption.
+
+`--device auto` selects available CUDA, then MPS, otherwise CPU; explicit unavailable
+accelerators fail. Device and software versions are logged. CPU uses one Torch
+thread. The measured verification environment reported CUDA and MPS unavailable.
+
+`updates.jsonl` records raw/shaping/scaled reward totals (including unfinished
+pieces of games), exact environment steps, throughput, policy/value losses,
+entropy, KL, clip fraction, explained variance, and pre-clipping gradient norm.
+`episodes.jsonl` records complete or time-truncated games, raw score, all reward
+components, maximum tile, length, environment ID and boundaries.
+`validation.jsonl` includes per-game raw scores and summaries. `best.pt` maximizes
+mean raw validation score; `last.pt` always saves the most recent update.
+Validation runs on separate environments and restores all training RNG states.
+
+Evaluation accepts repeated `--checkpoint`, the legacy `--compare-checkpoint`,
+`--seeds-file seeds.json` (a JSON integer list), `--deterministic` (PPO argmax,
+default), or `--no-deterministic` (PPO sampling). DQN always uses greedy Q values;
+Random and Greedy retain their stochastic action/tie behavior. All methods use
+identical environment seed lists, with independently seeded per-game policy RNGs.
+Different action paths do not produce identical spawn histories.
+Algorithm dispatch checks metadata or recognized legacy DQN keys; an explicit
+`--algorithm` mismatch is an error. No checkpoint means Random/Greedy only.
+
+For filtered checkpoints, default evaluation additionally tests the **same weights
+with filtering disabled**, marked `evaluation_condition_changed=True`. An explicit
+`--strategy` / `--no-strategy` (also corner-filter aliases) overrides this.
+Reports include mean, median, standard deviation, quartiles, 512/1024/2048 reach
+rates, maximum-tile distribution, episode lengths, auxiliary corner/snake metrics,
+checkpoint SHA256, training seed/steps/time, and evaluation mode. Do not select
+checkpoints or hyperparameters using final test results.
+
+### Full equal-budget matrix and ablations
+
+The runner creates all four PPO reward/filter ablations, original Vanilla DQN,
+original Strategy DQN, and Random/Greedy. It trains seeds 42/43/44, validates on
+100000–100009, and tests **each checkpoint on the same 100 seeds 200000–200099**.
+Validation and test seeds are separate; overlapping saved validation seeds are
+rejected by the evaluator. Random/Greedy have no training-seed dimension.
+The DQN harness uses the same validation frequency and selection metric as PPO;
+its update rule and reward remain unchanged from the audited branches.
+
+```bash
+# Print all commands without running anything:
+python scripts/run_matrix.py --output-dir experiments/formal_1m \
+  --total-steps 1000000 --train-seeds 42 43 44 --test-games 100 --device cpu
+# Execute the finite matrix (18 learning runs, no search/tuning loop):
+python scripts/run_matrix.py --output-dir experiments/formal_1m \
+  --total-steps 1000000 --train-seeds 42 43 44 --test-games 100 --device cpu --execute
+# One potential-shaping ablation:
+python train_ppo.py --config configs/ppo_formal.json --seed 42 \
+  --reward-mode potential --no-corner-filter --output-dir experiments/potential42
+# Same learned objective, explicit corner constraint:
+python train_ppo.py --config configs/ppo_formal.json --seed 42 \
+  --reward-mode potential --corner-filter --output-dir experiments/potential_corner42
+# Original DQN on exactly the same interaction budget:
+python train_dqn_budget.py --total-steps 1000000 --seed 42 --no-strategy \
+  --output-dir experiments/vanilla42
+python train_dqn_budget.py --total-steps 1000000 --seed 42 --strategy \
+  --output-dir experiments/strategy42
+```
+
+`per_training_seed.csv` preserves each run. `across_training_seeds.csv` summarizes
+run-level means and their sample standard deviations; it never pools all games
+into one training-variance-free estimate. Within-game score dispersion is a
+separate metric. Historical CSVs are background only.
+
+Measured smoke throughput is about 8,700–10,500 training interactions/second on
+this CPU environment. A 1M-step PPO run therefore starts with an estimate of
+roughly 2 minutes for collection+updates, plus validation/evaluation/checkpoint
+cost. This is extrapolation from early short runs; game length, filtering and
+hardware can change it. Consult the measured report for DQN and full-matrix
+estimates. No formal 1M-step run is started automatically.
+
+See [actual commands](experiments/ppo_verification/COMMANDS.md) and
+[results and limitations](experiments/ppo_verification/REPORT.md). Short runs
+establish functionality and expose variance; they do not establish that PPO
+improves trained DQN performance or reliably reaches 2048.

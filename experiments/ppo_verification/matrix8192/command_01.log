@@ -1,0 +1,2 @@
+                                                                             agent  corner_filter  average_score  median_score   score_std  reach_512_pct  reach_1024_pct  reach_2048_pct
+experiments/ppo_verification/matrix8192/ppo_raw_corner0/seed42/checkpoints/best.pt          False        2654.44        2650.0 1155.038067            3.0             0.0             0.0

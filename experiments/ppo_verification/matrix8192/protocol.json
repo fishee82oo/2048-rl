@@ -1,0 +1,13 @@
+{
+  "output_dir": "experiments/ppo_verification/matrix8192",
+  "total_steps": 8192,
+  "train_seeds": [
+    42,
+    43,
+    44
+  ],
+  "test_games": 100,
+  "validation_interval": 4096,
+  "device": "cpu",
+  "execute": true
+}

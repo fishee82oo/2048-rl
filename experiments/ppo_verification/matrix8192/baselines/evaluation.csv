@@ -1,0 +1,3 @@
+agent,checkpoint,checkpoint_sha256,training_seed,training_steps,training_seconds,evaluation_mode,corner_filter,evaluation_condition_changed,games,average_score,median_score,score_std,score_q25,score_q75,average_moves,corner_occupancy,snake_quality,max_tile_distribution,reach_128_pct,reach_256_pct,reach_512_pct,reach_1024_pct,reach_2048_pct
+Random,,,,,,random_ties,False,False,100,1100.08,1036.0,503.0701635904772,706.0,1317.0,118.79,2.4439909646005673,0.6867723719815809,"{""32"": 6, ""64"": 39, ""128"": 46, ""256"": 9}",55.00000000000001,9.0,0.0,0.0,0.0
+Greedy,,,,,,random_ties,False,False,100,2094.64,1848.0,936.8267470239064,1430.0,2773.0,186.3,2.0950531815478883,0.6681996442219089,"{""64"": 8, ""128"": 44, ""256"": 45, ""512"": 3}",92.0,48.0,3.0,0.0,0.0
